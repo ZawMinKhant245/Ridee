@@ -1,3 +1,4 @@
+import 'package:firstapp1/screen/search/search_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -25,10 +26,16 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         children: [
                          const Icon(Icons.horizontal_rule,weight: 200,),
+                          Text('Choose your desination',style: TextStyle(fontSize: 18),),
+                          const SizedBox(height: 20,),
                           TextField(
+                            onTap: ()=>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchScreen())),
+                            autofocus: false,
+                            showCursor: false,
                             decoration:InputDecoration(
                               filled: true,
-                              hintText: 'Where To',
+                              hintStyle: TextStyle(fontSize: 20,fontWeight: FontWeight.w600),
+                              hintText: 'Where To?',
                               prefixIcon: const Icon(Icons.search),
                               fillColor:const Color.fromARGB(255, 213, 209, 209),
                               border:InputBorder.none,
