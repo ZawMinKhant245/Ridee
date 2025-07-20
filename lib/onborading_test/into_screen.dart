@@ -22,7 +22,8 @@ class _IntroScreenState extends State<IntroScreen> {
               1,
               'Enjoy with Us, and discover the joy of a hassle  free ride',
             'sit back ,relax and enjoy the ride. Your satisfaction in our priority',
-            'assets/img.png'
+            'assets/img.png',
+            ''
           )
         ),
         PageViewModel(
@@ -30,9 +31,10 @@ class _IntroScreenState extends State<IntroScreen> {
           bodyWidget: buildIntroScreen(
               context,
               2,
-              'Enjoy with Us, and discover the joy of a hassle  free ride',
-            'sit back ,relax and enjoy the ride. Your satisfaction in our priority',
-            'assets/img.png'
+              '',
+            'Simple ride-hailing for your daily commute or urgent trips.',
+            'assets/car.png',
+            'Your everyday ride partner—just tap and go.'
           )
         ),
         PageViewModel(
@@ -40,9 +42,10 @@ class _IntroScreenState extends State<IntroScreen> {
           bodyWidget: buildIntroScreen(
               context,
               3,
-              'Enjoy with Us, and discover the joy of a hassle  free ride',
-            'sit back ,relax and enjoy the ride. Your satisfaction in our priority',
-            'assets/img.png'
+              'We prioritize your safety with real-time tracking and responsible drivers.',
+            '',
+            '',
+            'Ride with confidence—your safety is always our top priority.'
           )
         ),
       ],
@@ -70,32 +73,40 @@ class _IntroScreenState extends State<IntroScreen> {
         color: Colors.black,
         size: Size(5, 5),
         activeSize: Size(8, 8),
+        activeColor: Colors.black,
         activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(25)),
+          borderRadius: BorderRadius.all(Radius.circular(5)),
         )
       ),
     );
   }
 
-  Widget buildIntroScreen(BuildContext context,int pageId,String? title,String? bodyText,String image){
+  Widget buildIntroScreen(BuildContext context,int pageId,String? title,String? bodyText,String image,String? footerText){
     return Column(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(title!,style: pageId==1 ? TextStyle(fontWeight: FontWeight.bold,fontSize: 33): null,),
+        Text(title!,style: pageId==1 ? TextStyle(fontWeight: FontWeight.bold,fontSize: 33): TextStyle(fontWeight: FontWeight.bold,fontSize: 26),),
         const SizedBox(height: 20,),
-        Text(bodyText!,style: TextStyle(fontWeight: FontWeight.w500,color: Color.fromARGB(255, 170, 158, 158)),),
+        Text(bodyText!,style: pageId !=2 && pageId !=3 ? TextStyle(fontWeight: FontWeight.w500,color: Color.fromARGB(
+            255, 136, 127, 127)):
+        TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),
         const SizedBox(height: 20,),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: pageId!=3?Image.asset(image,width: 250,):Row(
-            children: [
-              Expanded(child: Image.asset('assets/male.png')),
-              Expanded(child: Image.asset('assets/img_1.png'))
-            ],
-          )
+        pageId!=3?Image.asset(image,width: 250,):Padding(
+          padding: const EdgeInsets.all(30),
+          child: Row(
+              children: [
+                Expanded(child: Image.asset('assets/male.png',)),
+                Expanded(child: Image.asset('assets/img_1.png'))
+              ],
+          ),
         ),
+        const SizedBox(height: 40,),
+        Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: Text(footerText!,style: TextStyle(color: Color.fromARGB(255, 27, 26, 26)),textAlign: TextAlign.center,),
+        )
       ],
     );
   }
