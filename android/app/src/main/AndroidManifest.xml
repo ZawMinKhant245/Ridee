@@ -1,8 +1,14 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="firstapp1"
+        android:label="Ridee"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:enableOnBackInvokedCallback="true"
+        android:icon="@mipmap/ic_launcher"
+        tools:targetApi="tiramisu">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCEZcfkFhjlmixGG7APA1EBFfAkSzjSPb8"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
