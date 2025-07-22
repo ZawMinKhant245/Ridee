@@ -1,7 +1,9 @@
 
+import 'dart:async';
+
+import 'package:firstapp1/homeScreen.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:google_place/google_place.dart';
 
 
 class SearchScreen extends StatefulWidget {
@@ -14,33 +16,48 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final startController=TextEditingController();
   final endController=TextEditingController();
-  List<String> suggestions = [];
 
- late FocusNode startFocusMode;
+ late GooglePlace googlePlace;
+ List<AutocompletePrediction>predictions=[];
+
+
+ DetailsResult? startPosition; //to get lat and long
+ DetailsResult? endPosition;
+
+ late FocusNode startFocusMode; //to focus the textField
  late  FocusNode endFocusMode;
+
+ Timer? time;
 
  @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    String apiKeys="AIzaSyBAhBRF5SO0Ov2nbcfyhmFzfsXUr44D2Nw";
+    googlePlace=GooglePlace(apiKeys);
     startFocusMode = FocusNode();
     endFocusMode = FocusNode();
   }
 
-  Future<List<String>> searchPlace(String query) async {
-    final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&limit=5');
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    startFocusMode.dispose();
+    endFocusMode.dispose();
+  }
 
-    final response = await http.get(url, headers: {
-      'User-Agent': 'Ridee (mzaw17591@gmail.com)' // Nominatim policy
-    });
 
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((place) => place['display_name'] as String).toList();
-    } else {
-      throw Exception('Failed to load place suggestions');
-    }
+
+
+  Future<void> autoCompleteSearch(String value) async {
+   final result=await googlePlace.autocomplete.get(value);
+   if(result != null && result.predictions != null && mounted){
+     print(result.predictions!.first.description);
+     setState(() {
+       predictions=result.predictions!;
+     });
+
+   }
   }
 
   @override
@@ -67,18 +84,26 @@ class _SearchScreenState extends State<SearchScreen> {
                     border:InputBorder.none,
                   suffixIcon: startController.text.isNotEmpty? IconButton(onPressed: (){
                     setState(() {
+                      predictions=[];
                       startController.clear();
-                      suggestions.clear();
                     });
                   }, icon: Icon(Icons.clear)): null
                 ),
                 onChanged: (value) async {
-                  if (value.length > 1) {
-                    final results = await searchPlace(value);
-                    setState(() {
-                      suggestions = results;
-                    });
-                  }
+                  if(time?.isActive?? false) time!.cancel();
+                  time=Timer(const Duration(milliseconds: 1000), (){
+                    if(value.isNotEmpty){
+                      //call api
+                      autoCompleteSearch(value);
+                    }else{
+                      //clear the reslt
+                      setState(() {
+                        predictions=[];
+                        startPosition=null;
+                      });
+                    }
+                  });
+
                 }
               ),
               const SizedBox(height: 10,),
@@ -86,6 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 controller: endController,
                 focusNode: endFocusMode,
                 style: TextStyle(fontSize: 20),
+                enabled: startController.text.isNotEmpty && startPosition !=null,
                 decoration:InputDecoration(
                   filled: true,
                   hintStyle: TextStyle(fontSize: 20,fontWeight: FontWeight.w600),
@@ -94,25 +120,33 @@ class _SearchScreenState extends State<SearchScreen> {
                   border:InputBorder.none,
                     suffixIcon: endController.text.isNotEmpty? IconButton(onPressed: (){
                       setState(() {
+                        predictions=[];
                         endController.clear();
-                        suggestions.clear();
                       });
                     }, icon: Icon(Icons.clear)): null
                 ),
-                onChanged: (value) async {
-                  if (value.length > 2) {
-                    final results = await searchPlace(value);
-                    setState(() {
-                      suggestions = results;
+                  onChanged: (value) async {
+                    if(time?.isActive?? false) time!.cancel();
+                    time=Timer(const Duration(milliseconds: 1000), (){
+                      if(value.isNotEmpty){
+                        //call api
+                        autoCompleteSearch(value);
+                      }else{
+                        //clear the reslt
+                        setState(() {
+                          predictions=[];
+                          startPosition=null;
+                        });
+                      }
                     });
+
                   }
-                },
               ),
               Container(
                 height: 600,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount:suggestions.length ,
+                  itemCount:predictions.length ,
                     itemBuilder: (context,index){
                     return Container(
                       decoration: BoxDecoration(
@@ -125,21 +159,29 @@ class _SearchScreenState extends State<SearchScreen> {
                           backgroundColor: Colors.indigo,
                           child: Icon(Icons.pin_drop,color: Colors.white,),
                         ),
-                        title: Text(suggestions[index]),
-                        shape: RoundedRectangleBorder(),
-                        onTap: (){
-                            if(startFocusMode.hasFocus){
-                              setState(() {
-                                startController.text=suggestions[index];
-                                suggestions=[];
-                              });
-                            }else if(endFocusMode.hasFocus){
-                              setState(() {
-                                endController.text=suggestions[index];
-                                suggestions=[];
-                              });
-                            }
+                        title: Text(predictions[index].description.toString()),
+                        onTap: () async {
+                         final placeId= predictions[index].placeId;
+                         final details=await googlePlace.details.get(placeId!);
+                         if(details != null && details.result  != null && mounted){
+                           if(startFocusMode.hasFocus){
+                             setState(() {
+                               startPosition=details.result;
+                               startController.text=details.result!.name!;
+                               predictions=[];
+                             });
+                           }else{
+                             setState(() {
+                               endPosition=details.result;
+                               endController.text=details.result!.name!;
+                               predictions=[];
+                             });
+                           }
+                           if(startPosition != null && endPosition != null){
+                             Navigator.of(context).push(MaterialPageRoute(builder: (context)=> HomeScreen(startPosition: startPosition,endPosition: endPosition,)));
+                           }
 
+                         }
                         },
                       ),
                     );
@@ -148,7 +190,10 @@ class _SearchScreenState extends State<SearchScreen> {
             ],
           ),
         ),
-      )
+      ),
+        floatingActionButton: FloatingActionButton(onPressed: (){
+          Navigator.of(context).push(MaterialPageRoute(builder: (context)=> HomeScreen(startPosition: startPosition,endPosition: endPosition,)));
+        },child: Text('Home'),),
     );
   }
 }
