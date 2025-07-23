@@ -7,8 +7,8 @@ import 'package:google_place/google_place.dart';
 
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
-
+  const SearchScreen({required this.currentLocation,super.key});
+  final currentLocation;
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -37,6 +37,10 @@ class _SearchScreenState extends State<SearchScreen> {
     googlePlace=GooglePlace(apiKeys);
     startFocusMode = FocusNode();
     endFocusMode = FocusNode();
+
+    if(startController.text.isEmpty){
+      startController.text=widget.currentLocation!.toString();
+    }
   }
 
   void dispose() {
@@ -178,7 +182,7 @@ class _SearchScreenState extends State<SearchScreen> {
                              });
                            }
                            if(startPosition != null && endPosition != null){
-                             Navigator.of(context).push(MaterialPageRoute(builder: (context)=> HomeScreen(startPosition: startPosition,endPosition: endPosition,)));
+                             Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> HomeScreen(startPosition: startPosition,endPosition: endPosition,)));
                            }
 
                          }
@@ -191,9 +195,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
-        floatingActionButton: FloatingActionButton(onPressed: (){
-          Navigator.of(context).push(MaterialPageRoute(builder: (context)=> HomeScreen(startPosition: startPosition,endPosition: endPosition,)));
-        },child: Text('Home'),),
     );
   }
 }

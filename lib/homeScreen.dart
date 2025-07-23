@@ -20,9 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   GoogleMapController? controller;
   LatLng? currentLocation;
-
-
-  bool isVisible=false;
+  bool isVisible=true;
 
 
 
@@ -71,11 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
-
-
-
-
   Future<void>getCurrentLocation()async{
     LocationPermission locationPermission= await Geolocator.requestPermission();
 
@@ -123,13 +116,62 @@ class _HomeScreenState extends State<HomeScreen> {
             target:currentLocation!,
             zoom: 15
         ),
-        myLocationEnabled: isVisible?false:true,
+        myLocationEnabled: isVisible?true:false,
         myLocationButtonEnabled: true,
         markers: markers,
         polylines: polylines,
       );
     }
 
+  }
+
+  Widget buildSelectionCard({
+  required Image image,
+  required String type,
+  required String cost,
+    required String min,
+    required String people,
+    required String text,
+  required VoidCallback onTop,
+   }){
+    return Card(
+      surfaceTintColor: Color.fromARGB(255, 232, 227, 227),
+      elevation: 5,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: (){},
+          splashColor: Color.fromARGB(255, 232, 227, 227),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    Expanded(flex:1,child: image),
+                    const SizedBox(width: 30,),
+                    Expanded(
+                            flex: 2,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(type,style: TextStyle(fontWeight: FontWeight.bold),),
+                                Row(children: [Text('$min min'),Icon(Icons.person_2_outlined,size: 18,),Text(people)],),
+                                Text(text)
+                              ],
+                            ),
+                          ),
+                    Expanded(flex:1,child: Text('$cost B',style: TextStyle(fontWeight: FontWeight.bold),)),
+                  ]
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -152,10 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           const Icon(Icons.horizontal_rule,weight: 200,),
-                          Text('Choose your desination',style: TextStyle(fontSize: 18),),
+                          Text('Choose your desination',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
                           const SizedBox(height: 20,),
                           TextField(
-                            onTap: ()=>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchScreen())),
+                            onTap: ()=>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchScreen(currentLocation:currentLocation))),
                             autofocus: false,
                             showCursor: false,
                             decoration:InputDecoration(
@@ -165,10 +207,80 @@ class _HomeScreenState extends State<HomeScreen> {
                                 prefixIcon: const Icon(Icons.search),
                                 fillColor:const Color.fromARGB(255, 213, 209, 209),
                                 border:InputBorder.none,
-                                suffixIcon: IconButton(onPressed: ()=>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchScreen())), icon: const Icon(Icons.map_sharp)),
+                                suffixIcon: IconButton(onPressed: ()=>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchScreen(currentLocation: currentLocation,))), icon: const Icon(Icons.map_sharp)),
                                 suffixIconColor: Color.fromARGB(255, 207, 61, 30)
                             ),
-                          )
+                          ),
+                          const SizedBox(height: 20,),
+                          if(isVisible)...[
+                           Text('dsdsdsds')
+                          ], //need to add
+                          if(!isVisible)...[
+                            buildSelectionCard(
+                                image: Image.asset('assets/taxi.png',width: 60,),
+                                type: 'Taxi',
+                                cost: '100',
+                                min: '5',
+                                people: '4',
+                                text: 'Local Taxi',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/bike.png',width: 60,),
+                                type: 'MotoBike',
+                                cost: '65',
+                                min: '2',
+                                people: '1',
+                                text: '2 - Wheels',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/tuktuk.png',width: 60,),
+                                type: 'Tuk Tuk',
+                                cost: '78',
+                                min: '5',
+                                people: '3',
+                                text: 'comfort ride',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/comfortcar.png',width: 60,),
+                                type: 'Comfort',
+                                cost: '80',
+                                min: '4',
+                                people: '4',
+                                text: 'Affordable rides',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/suv.png',width: 60,),
+                                type: 'Suv',
+                                cost: '120',
+                                min: '5',
+                                people: '6',
+                                text: 'Local Taxi',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/truck.png',width: 60,),
+                                type: 'Truck',
+                                cost: '98',
+                                min: '5',
+                                people: '0',
+                                text: 'Max items - 50kg',
+                                onTop: (){print('Click');}
+                            ),
+                            buildSelectionCard(
+                                image: Image.asset('assets/delivery.png',width: 60,),
+                                type: 'Delivery',
+                                cost: '100',
+                                min: '5',
+                                people: '0',
+                                text: 'Send small items',
+                                onTop: (){print('Click');}
+                            ),
+                          ],
+                          
                         ],
                       ),
                     ),
